@@ -55,7 +55,7 @@ fun PerfilScreen(onAceptar: () -> Unit) {
             contentAlignment = Alignment.Center
         ) { Text("👤", fontSize = 40.sp) }
 
-        // Placeholder de campo "Nombre" (TextField no está en el temario)
+        // Placeholder de campo "Nombre"
         Box(
             modifier = Modifier.fillMaxWidth().padding(top = 24.dp).background(CampoGris).padding(12.dp)
         ) { Text("Nombre") }
@@ -237,10 +237,10 @@ fun ComunidadScreen(
                         .align(Alignment.CenterStart)
                 ) { Text("mensaje") }
                 Button(
-                    onClick = {}, // o onVolver según el caso
-                    modifier = Modifier.align(Alignment.CenterEnd), // o CenterStart
+                    onClick = {},
+                    modifier = Modifier.align(Alignment.CenterEnd),
                     colors = ButtonDefaults.buttonColors(containerColor = AzulPrincipal, contentColor = Color.White)
-                ) { Text("➤") } // o "←"
+                ) { Text("➤") }
             }
         }
     ) { innerPadding ->
@@ -303,10 +303,10 @@ fun ChatDetalleScreen(onVolver: () -> Unit) {
                         .align(Alignment.CenterStart)
                 ) { Text("mensaje") }
                 Button(
-                    onClick = {}, // o onVolver según el caso
-                    modifier = Modifier.align(Alignment.CenterEnd), // o CenterStart
+                    onClick = {},
+                    modifier = Modifier.align(Alignment.CenterEnd),
                     colors = ButtonDefaults.buttonColors(containerColor = AzulPrincipal, contentColor = Color.White)
-                ) { Text("➤") } // o "←"
+                ) { Text("➤") }
             }
         }
     ) { innerPadding ->
