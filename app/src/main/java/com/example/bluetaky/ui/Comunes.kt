@@ -1,4 +1,4 @@
-package com.example.bluetaky.ui.theme.screens
+package com.example.bluetaky.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,15 +16,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.bluetaky.domain.Mensaje
 
-// Componentes que se repiten en varias pantallas.
-// Tenerlos en un solo archivo evita duplicar código.
+/**
+ * Componentes visuales que se repiten en varias pantallas.
+ * No tienen estado propio ni conocen ViewModels: reciben todo por parámetro.
+ */
+
+/** Pestaña resaltada en [BarraTabs]. Es solo un dato visual, no una ruta. */
+enum class Tab { CONECTADOS, CHATS, COMUNIDAD }
 
 @Composable
-fun EncabezadoPrincipal(onOpciones: () -> Unit) {
-    Box(modifier = Modifier.fillMaxWidth().background(AzulPrincipal).padding(12.dp)) {
+fun EncabezadoPrincipal(nombre: String, onOpciones: () -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth().background(Colores.AzulPrincipal).padding(12.dp)) {
         Text(
-            Sesion.nombre,
+            nombre,
             color = Color.White,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.CenterStart)
@@ -32,26 +38,26 @@ fun EncabezadoPrincipal(onOpciones: () -> Unit) {
         Button(
             onClick = onOpciones,
             modifier = Modifier.align(Alignment.CenterEnd),
-            colors = ButtonDefaults.buttonColors(containerColor = AzulOscuro, contentColor = Color.White)
+            colors = ButtonDefaults.buttonColors(containerColor = Colores.AzulOscuro, contentColor = Color.White)
         ) { Text("Opciones") }
     }
 }
 
 @Composable
 fun BarraTabs(
-    tabActual: String,
+    tabActual: Tab,
     onConectados: () -> Unit,
     onChats: () -> Unit,
     onComunidad: () -> Unit
 ) {
-    Row(modifier = Modifier.fillMaxWidth().background(AzulOscuro)) {
-        TabBoton("Conectados", tabActual == "conectados", onConectados, Modifier.weight(1f))
-        TabBoton("Chats", tabActual == "chats", onChats, Modifier.weight(1f))
-        TabBoton("Comunidad", tabActual == "comunidad", onComunidad, Modifier.weight(1f))
+    Row(modifier = Modifier.fillMaxWidth().background(Colores.AzulOscuro)) {
+        TabBoton("Conectados", tabActual == Tab.CONECTADOS, onConectados, Modifier.weight(1f))
+        TabBoton("Chats", tabActual == Tab.CHATS, onChats, Modifier.weight(1f))
+        TabBoton("Comunidad", tabActual == Tab.COMUNIDAD, onComunidad, Modifier.weight(1f))
     }
 }
 
-// Recibe Modifier como parámetro para poder aplicarle weight(1f) desde el Row.
+/** Recibe [modifier] para que [BarraTabs] pueda aplicarle weight(1f) desde el Row. */
 @Composable
 private fun TabBoton(
     texto: String,
@@ -63,13 +69,13 @@ private fun TabBoton(
         onClick = onClick,
         modifier = modifier.padding(2.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (activo) Color.White else AzulOscuro,
-            contentColor = if (activo) AzulPrincipal else Color.White
+            containerColor = if (activo) Color.White else Colores.AzulOscuro,
+            contentColor = if (activo) Colores.AzulPrincipal else Color.White
         )
     ) { Text(texto, fontSize = 12.sp) }
 }
 
-// Buscador. El texto que escribe el usuario sube a la pantalla con onValorChange.
+/** Buscador. El texto que escribe el usuario sube a la pantalla con [onValorChange]. */
 @Composable
 fun BarraDeBusqueda(
     valor: String,
@@ -87,7 +93,7 @@ fun BarraDeBusqueda(
     }
 }
 
-// Campo de mensaje + botón de envío, usado en Comunidad y en el detalle de chat.
+/** Campo de mensaje + botón de envío, usado en Comunidad y en el detalle de chat. */
 @Composable
 fun BarraDeMensaje(
     texto: String,
@@ -108,25 +114,29 @@ fun BarraDeMensaje(
         Button(
             onClick = onEnviar,
             modifier = Modifier.padding(start = 8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = AzulPrincipal, contentColor = Color.White)
+            colors = ButtonDefaults.buttonColors(containerColor = Colores.AzulPrincipal, contentColor = Color.White)
         ) { Text("Enviar") }
     }
 }
 
-// Burbuja de mensaje: a la derecha si es propio, a la izquierda si es recibido.
+/**
+ * Burbuja de mensaje: a la derecha si es propio, a la izquierda si es recibido.
+ * Con [mostrarAutor] = false se omite el nombre; en un chat de a dos alcanza
+ * con la posición de la burbuja.
+ */
 @Composable
 fun BurbujaMensaje(mensaje: Mensaje, mostrarAutor: Boolean = true) {
     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Box(
             modifier = Modifier
-                .background(if (mensaje.propio) AzulPrincipal else Color.White)
+                .background(if (mensaje.propio) Colores.AzulPrincipal else Color.White)
                 .padding(12.dp)
                 .align(if (mensaje.propio) Alignment.CenterEnd else Alignment.CenterStart)
         ) {
             if (mostrarAutor) {
                 Text(
                     "${mensaje.autor}: ${mensaje.texto}",
-                    color = if (mensaje.propio) Color.White else AzulOscuro
+                    color = if (mensaje.propio) Color.White else Colores.AzulOscuro
                 )
             } else {
                 Text(

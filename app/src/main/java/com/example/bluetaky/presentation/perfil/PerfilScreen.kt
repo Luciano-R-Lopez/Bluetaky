@@ -1,4 +1,4 @@
-package com.example.bluetaky.ui.theme.screens
+package com.example.bluetaky.presentation.perfil
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,37 +12,65 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.bluetaky.ui.Colores
 
+/**
+ * Observa el ViewModel y le reenvía lo que el usuario escribe.
+ * "Aceptar" se avisa hacia afuera para que el grafo de navegación elija la ruta.
+ */
 @Composable
-fun PerfilScreen(onAceptar: () -> Unit) {
+fun PerfilRoute(
+    viewModel: PerfilViewModel,
+    onAceptar: () -> Unit
+) {
+    val estado by viewModel.uiState.collectAsStateWithLifecycle()
+
+    PerfilScreen(
+        estado = estado,
+        onNombre = viewModel::cambiarNombre,
+        onEstado = viewModel::cambiarEstado,
+        onAceptar = onAceptar
+    )
+}
+
+/**
+ * Dibuja [estado] y nada más.
+ */
+@Composable
+fun PerfilScreen(
+    estado: PerfilUiState,
+    onNombre: (String) -> Unit,
+    onEstado: (String) -> Unit,
+    onAceptar: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize().background(Color.White).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Avatar: Box de tamaño fijo con fondo gris
         Box(
-            modifier = Modifier.padding(top = 24.dp).size(100.dp).background(CampoGris),
+            modifier = Modifier.padding(top = 24.dp).size(100.dp).background(Colores.CampoGris),
             contentAlignment = Alignment.Center
-        ) { Text("bt", color = AzulPrincipal, fontSize = 36.sp) }
+        ) { Text("bt", color = Colores.AzulPrincipal, fontSize = 36.sp) }
 
-        // TextField: lo que escribe el usuario se guarda en Sesion
-        // y el encabezado de las otras pantallas se actualiza solo.
         TextField(
-            value = Sesion.nombre,
-            onValueChange = { Sesion.nombre = it },
+            value = estado.nombre,
+            onValueChange = onNombre,
             label = { Text("Nombre") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth().padding(top = 24.dp)
         )
 
         TextField(
-            value = Sesion.estado,
-            onValueChange = { Sesion.estado = it },
+            value = estado.estado,
+            onValueChange = onEstado,
             label = { Text("Estado (opcional)") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp)
@@ -50,7 +78,7 @@ fun PerfilScreen(onAceptar: () -> Unit) {
 
         Text(
             "Al usar esta aplicación aceptás nuestras políticas y condiciones de uso.",
-            color = AzulPrincipal,
+            color = Colores.AzulPrincipal,
             fontSize = 13.sp,
             modifier = Modifier.padding(vertical = 20.dp)
         )
@@ -58,9 +86,20 @@ fun PerfilScreen(onAceptar: () -> Unit) {
         Button(
             onClick = onAceptar,
             colors = ButtonDefaults.buttonColors(
-                containerColor = AzulPrincipal,
+                containerColor = Colores.AzulPrincipal,
                 contentColor = Color.White
             )
         ) { Text("Aceptar") }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PerfilPreview() {
+    PerfilScreen(
+        estado = PerfilUiState(nombre = "German Lantaño", estado = "Ya fue wacho"),
+        onNombre = {},
+        onEstado = {},
+        onAceptar = {}
+    )
 }

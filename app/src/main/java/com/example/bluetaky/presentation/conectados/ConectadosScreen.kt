@@ -1,4 +1,4 @@
-package com.example.bluetaky.ui.theme.screens
+package com.example.bluetaky.presentation.conectados
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,37 +12,59 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.bluetaky.domain.Contacto
+import com.example.bluetaky.ui.BarraDeBusqueda
+import com.example.bluetaky.ui.BarraTabs
+import com.example.bluetaky.ui.Colores
+import com.example.bluetaky.ui.EncabezadoPrincipal
+import com.example.bluetaky.ui.Tab
 
+/**
+ * Observa el ViewModel y le reenvía la búsqueda. Cambiar de pestaña u abrir Opciones
+ * se avisa hacia afuera para que el grafo de navegación elija la ruta.
+ */
 @Composable
-fun ConectadosScreen(
+fun ConectadosRoute(
+    viewModel: ConectadosViewModel,
     onOpciones: () -> Unit,
     onIrAChats: () -> Unit,
     onIrAComunidad: () -> Unit
 ) {
-    // remember + mutableStateOf: guarda lo que el usuario escribe en el buscador.
-    // Cada vez que cambia, Compose vuelve a dibujar la lista filtrada.
-    var busqueda by remember { mutableStateOf("") }
+    val estado by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val conectados = listOf("Alberzo Fernande", "lagarto1234", "Luciano")
-    val desconectados = listOf("Fernando2", "Fabian Fernando", "Javier Milei")
+    ConectadosScreen(
+        estado = estado,
+        onBusqueda = viewModel::cambiarBusqueda,
+        onOpciones = onOpciones,
+        onIrAChats = onIrAChats,
+        onIrAComunidad = onIrAComunidad
+    )
+}
 
-    val conectadosFiltrados = conectados.filter { it.contains(busqueda, ignoreCase = true) }
-    val desconectadosFiltrados = desconectados.filter { it.contains(busqueda, ignoreCase = true) }
-
+/**
+ * Dibuja [estado] y nada más. No filtra: la lista ya llega filtrada.
+ */
+@Composable
+fun ConectadosScreen(
+    estado: ConectadosUiState,
+    onBusqueda: (String) -> Unit,
+    onOpciones: () -> Unit,
+    onIrAChats: () -> Unit,
+    onIrAComunidad: () -> Unit
+) {
     Scaffold(
         topBar = {
             Column {
-                EncabezadoPrincipal(onOpciones)
+                EncabezadoPrincipal(estado.nombreUsuario, onOpciones)
                 BarraTabs(
-                    tabActual = "conectados",
+                    tabActual = Tab.CONECTADOS,
                     onConectados = {},
                     onChats = onIrAChats,
                     onComunidad = onIrAComunidad
@@ -51,8 +73,8 @@ fun ConectadosScreen(
         },
         bottomBar = {
             BarraDeBusqueda(
-                valor = busqueda,
-                onValorChange = { busqueda = it },
+                valor = estado.busqueda,
+                onValorChange = onBusqueda,
                 etiqueta = "Buscar dispositivo"
             )
         }
@@ -61,27 +83,26 @@ fun ConectadosScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(FondoClaro)
+                .background(Colores.FondoClaro)
                 .verticalScroll(rememberScrollState())
                 .padding(12.dp)
         ) {
-            Text("Conectados", fontWeight = FontWeight.Bold, color = AzulPrincipal)
-            conectadosFiltrados.forEach { nombre ->
-                FilaUsuario(nombre, conectado = true)
+            Text("Conectados", fontWeight = FontWeight.Bold, color = Colores.AzulPrincipal)
+            estado.conectados.forEach { contacto ->
+                FilaUsuario(contacto.nombre, conectado = true)
             }
 
             Text(
                 "Desconectados",
                 fontWeight = FontWeight.Bold,
-                color = AzulPrincipal,
+                color = Colores.AzulPrincipal,
                 modifier = Modifier.padding(top = 16.dp)
             )
-            desconectadosFiltrados.forEach { nombre ->
-                FilaUsuario(nombre, conectado = false)
+            estado.desconectados.forEach { contacto ->
+                FilaUsuario(contacto.nombre, conectado = false)
             }
 
-            // Aviso cuando la búsqueda no encuentra a nadie
-            if (conectadosFiltrados.isEmpty() && desconectadosFiltrados.isEmpty()) {
+            if (estado.sinResultados) {
                 Text(
                     "No se encontró ningún dispositivo con ese nombre.",
                     color = Color.DarkGray,
@@ -104,8 +125,24 @@ private fun FilaUsuario(nombre: String, conectado: Boolean) {
         Text(nombre, modifier = Modifier.align(Alignment.CenterStart))
         Text(
             if (conectado) "En línea" else "Fuera de línea",
-            color = if (conectado) AzulPrincipal else Color.Red,
+            color = if (conectado) Colores.AzulPrincipal else Color.Red,
             modifier = Modifier.align(Alignment.CenterEnd)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ConectadosPreview() {
+    ConectadosScreen(
+        estado = ConectadosUiState(
+            nombreUsuario = "German Lantaño",
+            conectados = listOf(Contacto("Luciano", true)),
+            desconectados = listOf(Contacto("Javier Milei", false))
+        ),
+        onBusqueda = {},
+        onOpciones = {},
+        onIrAChats = {},
+        onIrAComunidad = {}
+    )
 }

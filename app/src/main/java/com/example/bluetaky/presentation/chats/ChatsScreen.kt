@@ -1,4 +1,4 @@
-package com.example.bluetaky.ui.theme.screens
+package com.example.bluetaky.presentation.chats
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -13,46 +13,63 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.bluetaky.domain.Chat
+import com.example.bluetaky.ui.BarraDeBusqueda
+import com.example.bluetaky.ui.BarraTabs
+import com.example.bluetaky.ui.Colores
+import com.example.bluetaky.ui.EncabezadoPrincipal
+import com.example.bluetaky.ui.Tab
 
+/**
+ * Observa el ViewModel y le reenvía la búsqueda. Abrir un chat, cambiar de pestaña
+ * u abrir Opciones se avisa hacia afuera para que el grafo elija la ruta.
+ */
 @Composable
-fun ChatsScreen(
+fun ChatsRoute(
+    viewModel: ChatsViewModel,
     onOpciones: () -> Unit,
     onIrAConectados: () -> Unit,
     onIrAComunidad: () -> Unit,
     onAbrirChat: () -> Unit
 ) {
-    // Texto del buscador de chats
-    var busqueda by remember { mutableStateOf("") }
+    val estado by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val chats = listOf(
-        "Fabian Fernando" to "Todo bien amigo? sigue en pie lo de la juntada?",
-        "Luciano" to "Dame todo lo que me debes",
-        "Fernando2" to "viste que hay alguien que se llama como yo?",
-        "lagarto1234" to "grabamos un video?",
-        "Javier Milei" to "ahi te pague todo",
-        "Alberzo Fernande" to "Decime algo lindo"
+    ChatsScreen(
+        estado = estado,
+        onBusqueda = viewModel::cambiarBusqueda,
+        onOpciones = onOpciones,
+        onIrAConectados = onIrAConectados,
+        onIrAComunidad = onIrAComunidad,
+        onAbrirChat = onAbrirChat
     )
+}
 
-    // Filtra por nombre o por el contenido del último mensaje
-    val chatsFiltrados = chats.filter { (nombre, mensaje) ->
-        nombre.contains(busqueda, ignoreCase = true) ||
-            mensaje.contains(busqueda, ignoreCase = true)
-    }
-
+/**
+ * Dibuja [estado] y nada más. No filtra: la lista ya llega filtrada.
+ * Cada fila es un Button porque ya trae onClick.
+ */
+@Composable
+fun ChatsScreen(
+    estado: ChatsUiState,
+    onBusqueda: (String) -> Unit,
+    onOpciones: () -> Unit,
+    onIrAConectados: () -> Unit,
+    onIrAComunidad: () -> Unit,
+    onAbrirChat: () -> Unit
+) {
     Scaffold(
         topBar = {
             Column {
-                EncabezadoPrincipal(onOpciones)
+                EncabezadoPrincipal(estado.nombreUsuario, onOpciones)
                 BarraTabs(
-                    tabActual = "chats",
+                    tabActual = Tab.CHATS,
                     onConectados = onIrAConectados,
                     onChats = {},
                     onComunidad = onIrAComunidad
@@ -61,8 +78,8 @@ fun ChatsScreen(
         },
         bottomBar = {
             BarraDeBusqueda(
-                valor = busqueda,
-                onValorChange = { busqueda = it },
+                valor = estado.busqueda,
+                onValorChange = onBusqueda,
                 etiqueta = "Buscar chat"
             )
         }
@@ -71,12 +88,11 @@ fun ChatsScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(FondoClaro)
+                .background(Colores.FondoClaro)
                 .verticalScroll(rememberScrollState())
                 .padding(12.dp)
         ) {
-            chatsFiltrados.forEach { (nombre, mensaje) ->
-                // Button: cada fila es clickeable porque Button ya trae onClick
+            estado.chats.forEach { chat ->
                 Button(
                     onClick = onAbrirChat,
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -86,13 +102,13 @@ fun ChatsScreen(
                     )
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(nombre, fontWeight = FontWeight.Bold, color = AzulPrincipal)
-                        Text(mensaje, fontSize = 13.sp, color = Color.DarkGray)
+                        Text(chat.nombre, fontWeight = FontWeight.Bold, color = Colores.AzulPrincipal)
+                        Text(chat.ultimoMensaje, fontSize = 13.sp, color = Color.DarkGray)
                     }
                 }
             }
 
-            if (chatsFiltrados.isEmpty()) {
+            if (estado.chats.isEmpty()) {
                 Text(
                     "No hay chats que coincidan con la búsqueda.",
                     color = Color.DarkGray,
@@ -101,4 +117,20 @@ fun ChatsScreen(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ChatsPreview() {
+    ChatsScreen(
+        estado = ChatsUiState(
+            nombreUsuario = "German Lantaño",
+            chats = listOf(Chat("Luciano", "Dame todo lo que me debes"))
+        ),
+        onBusqueda = {},
+        onOpciones = {},
+        onIrAConectados = {},
+        onIrAComunidad = {},
+        onAbrirChat = {}
+    )
 }
