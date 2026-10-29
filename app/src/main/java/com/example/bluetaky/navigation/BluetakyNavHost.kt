@@ -26,9 +26,7 @@ import com.example.bluetaky.presentation.opciones.OpcionesViewModelFactory
 import com.example.bluetaky.presentation.perfil.PerfilRoute
 import com.example.bluetaky.presentation.perfil.PerfilViewModel
 import com.example.bluetaky.presentation.perfil.PerfilViewModelFactory
-import com.example.bluetaky.presentation.splash.SplashRoute
-import com.example.bluetaky.presentation.splash.SplashViewModel
-import com.example.bluetaky.presentation.splash.SplashViewModelFactory
+import com.example.bluetaky.presentation.splash.SplashScreen
 
 /**
  * Conecta destinos. Traduce "el usuario quiere ir a X" a una ruta.
@@ -47,11 +45,8 @@ fun BluetakyNavHost() {
     NavHost(navController = navController, startDestination = Rutas.SPLASH) {
 
         composable(Rutas.SPLASH) {
-            val factory = remember { SplashViewModelFactory() }
-            val viewModel: SplashViewModel = viewModel(factory = factory)
-
-            SplashRoute(
-                viewModel = viewModel,
+            // Sin ViewModel: la pantalla no tiene datos ni lógica, solo un botón.
+            SplashScreen(
                 onComenzar = { navController.navigate(Rutas.PERFIL) }
             )
         }
