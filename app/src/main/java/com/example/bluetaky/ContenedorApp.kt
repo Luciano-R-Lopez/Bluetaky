@@ -1,5 +1,6 @@
 package com.example.bluetaky
 
+import android.content.Context
 import com.example.bluetaky.data.repository.AjustesRepository
 import com.example.bluetaky.data.repository.AjustesRepositoryImpl
 import com.example.bluetaky.data.repository.ChatsRepository
@@ -26,8 +27,20 @@ import com.example.bluetaky.data.source.PerfilLocalDataSource
  * en una pantalla no llegaría al encabezado de las otras).
  */
 object ContenedorApp {
+    private lateinit var contexto: Context
+
+    /**
+     * Se llama una sola vez desde MainActivity.onCreate, antes de setContent
+     * (igual que el ejemplo de clase crea el repositorio en MainActivity).
+     * Se guarda applicationContext y no la Activity: el contexto de la Activity
+     * se destruye al rotar y quedaría una referencia colgando.
+     */
+    fun inicializar(context: Context) {
+        contexto = context.applicationContext
+    }
+
     val repositorioPerfil: PerfilRepository by lazy {
-        PerfilRepositoryImpl(PerfilLocalDataSource())
+        PerfilRepositoryImpl(PerfilLocalDataSource(contexto))
     }
 
     val repositorioContactos: ContactosRepository by lazy {
@@ -43,6 +56,6 @@ object ContenedorApp {
     }
 
     val repositorioAjustes: AjustesRepository by lazy {
-        AjustesRepositoryImpl(AjustesLocalDataSource())
+        AjustesRepositoryImpl(AjustesLocalDataSource(contexto))
     }
 }

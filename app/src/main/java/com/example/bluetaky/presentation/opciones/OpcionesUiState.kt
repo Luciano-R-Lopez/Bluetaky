@@ -1,10 +1,11 @@
 package com.example.bluetaky.presentation.opciones
 
-import com.example.bluetaky.domain.Ajuste
+import com.example.bluetaky.domain.Ajustes
 
 /**
- * Lo que muestra la pantalla de opciones: la lista de ajustes ya lista para dibujar.
+ * Lo que muestra la pantalla de opciones: los ajustes guardados.
+ * La pantalla decide cómo escribirlos (ON/OFF, SI/NO, porcentaje).
  */
 data class OpcionesUiState(
-    val ajustes: List<Ajuste> = emptyList()
+    val ajustes: Ajustes = Ajustes()
 )

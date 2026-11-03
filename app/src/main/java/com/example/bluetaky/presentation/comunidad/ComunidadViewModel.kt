@@ -40,8 +40,9 @@ class ComunidadViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
+        // Valor fijo: el nombre real llega del DataStore un instante después.
         initialValue = ComunidadUiState(
-            nombreUsuario = perfilRepository.observarPerfil().value.nombre,
+            nombreUsuario = "",
             texto = "",
             mensajes = comunidadRepository.observarMensajes().value
         )
@@ -57,7 +58,7 @@ class ComunidadViewModel(
             return
         }
         texto.value = ""
-        val autor = perfilRepository.observarPerfil().value.nombre
+        val autor = uiState.value.nombreUsuario
         viewModelScope.launch {
             comunidadRepository.enviar(autor, escrito)
         }

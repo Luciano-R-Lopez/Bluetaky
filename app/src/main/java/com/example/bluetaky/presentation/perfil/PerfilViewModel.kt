@@ -7,6 +7,7 @@ import com.example.bluetaky.data.repository.PerfilRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -18,18 +19,22 @@ import kotlinx.coroutines.launch
  * de las otras pantallas ya muestra el nombre nuevo cuando se abren.
  * El estado de los campos se actualiza primero acá y después en el repositorio
  * (en vez de derivarlo del repositorio) para que el cursor del TextField no
- * salte mientras el usuario escribe.
+ * salte mientras el usuario escribe: por eso el perfil guardado se lee una sola
+ * vez al crear el ViewModel (first) y no se vuelve a escuchar.
  */
 class PerfilViewModel(
     private val repository: PerfilRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(
-        repository.observarPerfil().value.let { perfil ->
-            PerfilUiState(nombre = perfil.nombre, estado = perfil.estado)
-        }
-    )
+    private val _uiState = MutableStateFlow(PerfilUiState())
     val uiState: StateFlow<PerfilUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            val perfil = repository.observarPerfil().first()
+            _uiState.value = PerfilUiState(nombre = perfil.nombre, estado = perfil.estado)
+        }
+    }
 
     fun cambiarNombre(valor: String) {
         _uiState.update { it.copy(nombre = valor) }

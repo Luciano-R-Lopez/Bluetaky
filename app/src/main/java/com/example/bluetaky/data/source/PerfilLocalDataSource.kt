@@ -1,34 +1,40 @@
 package com.example.bluetaky.data.source
 
+import android.content.Context
+import androidx.datastore.preferences.core.edit
+import com.example.bluetaky.data.PreferencesKeys
+import com.example.bluetaky.data.dataStore
 import com.example.bluetaky.domain.Perfil
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
- * Fuente de datos en memoria del perfil. Es la parte del Model que guarda
- * el nombre y el estado del usuario (lo que antes vivía en el object Sesion).
- * Quien observa [perfil] se entera cuando cambia.
+ * Fuente de datos del perfil: lee y escribe el nombre y el estado en DataStore.
+ * Es el único lugar del perfil que conoce DataStore (como UserPreferencesRepository
+ * en el ejemplo de clase). Quien observa [perfil] se entera cuando cambia.
+ *
+ * El operador ?: da el valor inicial si la clave todavía no fue guardada.
  */
 class PerfilLocalDataSource(
-    perfilInicial: Perfil = PERFIL_INICIAL
+    private val context: Context
 ) {
-    private val _perfil = MutableStateFlow(perfilInicial)
-    val perfil: StateFlow<Perfil> = _perfil.asStateFlow()
-
-    fun actualizarNombre(nombre: String) {
-        _perfil.update { it.copy(nombre = nombre) }
+    val perfil: Flow<Perfil> = context.dataStore.data.map { prefs ->
+        Perfil(
+            nombre = prefs[PreferencesKeys.PERFIL_NOMBRE] ?: NOMBRE_INICIAL,
+            estado = prefs[PreferencesKeys.PERFIL_ESTADO] ?: ESTADO_INICIAL
+        )
     }
 
-    fun actualizarEstado(estado: String) {
-        _perfil.update { it.copy(estado = estado) }
+    suspend fun actualizarNombre(nombre: String) {
+        context.dataStore.edit { prefs -> prefs[PreferencesKeys.PERFIL_NOMBRE] = nombre }
+    }
+
+    suspend fun actualizarEstado(estado: String) {
+        context.dataStore.edit { prefs -> prefs[PreferencesKeys.PERFIL_ESTADO] = estado }
     }
 
     companion object {
-        val PERFIL_INICIAL = Perfil(
-            nombre = "German Lantaño",
-            estado = "Ya fue wacho"
-        )
+        const val NOMBRE_INICIAL = "German Lantaño"
+        const val ESTADO_INICIAL = "Ya fue wacho"
     }
 }

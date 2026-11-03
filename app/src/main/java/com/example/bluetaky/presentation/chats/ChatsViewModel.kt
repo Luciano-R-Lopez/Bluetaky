@@ -36,8 +36,9 @@ class ChatsViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
+        // Valor fijo: el nombre real llega del DataStore un instante después.
         initialValue = ChatsUiState(
-            nombreUsuario = perfilRepository.observarPerfil().value.nombre,
+            nombreUsuario = "",
             busqueda = "",
             chats = chatsRepository.observarChats().value
         )

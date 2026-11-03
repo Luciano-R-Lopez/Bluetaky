@@ -35,8 +35,9 @@ class ConectadosViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
+        // Valor fijo: el nombre real llega del DataStore un instante después.
         initialValue = construirEstado(
-            nombre = perfilRepository.observarPerfil().value.nombre,
+            nombre = "",
             contactos = contactosRepository.observarContactos().value,
             texto = ""
         )

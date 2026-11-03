@@ -12,6 +12,7 @@ import com.example.bluetaky.navigation.BluetakyNavHost
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ContenedorApp.inicializar(applicationContext)
         setContent {
             BluetakyNavHost()
         }
