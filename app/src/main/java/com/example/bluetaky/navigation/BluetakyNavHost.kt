@@ -1,13 +1,16 @@
 package com.example.bluetaky.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.bluetaky.ContenedorApp
+import com.example.bluetaky.domain.Ajustes
 import com.example.bluetaky.presentation.chatdetalle.ChatDetalleRoute
 import com.example.bluetaky.presentation.chatdetalle.ChatDetalleViewModel
 import com.example.bluetaky.presentation.chatdetalle.ChatDetalleViewModelFactory
@@ -27,6 +30,7 @@ import com.example.bluetaky.presentation.perfil.PerfilRoute
 import com.example.bluetaky.presentation.perfil.PerfilViewModel
 import com.example.bluetaky.presentation.perfil.PerfilViewModelFactory
 import com.example.bluetaky.presentation.splash.SplashScreen
+import com.example.bluetaky.ui.Colores
 
 /**
  * Conecta destinos. Traduce "el usuario quiere ir a X" a una ruta.
@@ -42,11 +46,17 @@ import com.example.bluetaky.presentation.splash.SplashScreen
 fun BluetakyNavHost() {
     val navController = rememberNavController()
 
+    // El dark mode se observa acá, una sola vez, y la paleta baja a cada pantalla como parámetro.
+    val ajustes by remember { ContenedorApp.repositorioAjustes.observarAjustes() }
+        .collectAsStateWithLifecycle(initialValue = Ajustes())
+    val paleta = Colores.paleta(ajustes.darkMode)
+
     NavHost(navController = navController, startDestination = Rutas.SPLASH) {
 
         composable(Rutas.SPLASH) {
             // Sin ViewModel: la pantalla no tiene datos ni lógica, solo un botón.
             SplashScreen(
+                paleta = paleta,
                 onComenzar = { navController.navigate(Rutas.PERFIL) }
             )
         }
@@ -56,6 +66,7 @@ fun BluetakyNavHost() {
             val viewModel: PerfilViewModel = viewModel(factory = factory)
 
             PerfilRoute(
+                paleta = paleta,
                 viewModel = viewModel,
                 onAceptar = { navController.navigate(Rutas.CONECTADOS) }
             )
@@ -71,6 +82,7 @@ fun BluetakyNavHost() {
             val viewModel: ConectadosViewModel = viewModel(factory = factory)
 
             ConectadosRoute(
+                paleta = paleta,
                 viewModel = viewModel,
                 onOpciones = { navController.navigate(Rutas.OPCIONES) },
                 onIrAChats = { navController.cambiarDeTab(Rutas.CHATS) },
@@ -88,6 +100,7 @@ fun BluetakyNavHost() {
             val viewModel: ChatsViewModel = viewModel(factory = factory)
 
             ChatsRoute(
+                paleta = paleta,
                 viewModel = viewModel,
                 onOpciones = { navController.navigate(Rutas.OPCIONES) },
                 onIrAConectados = { navController.cambiarDeTab(Rutas.CONECTADOS) },
@@ -106,6 +119,7 @@ fun BluetakyNavHost() {
             val viewModel: ComunidadViewModel = viewModel(factory = factory)
 
             ComunidadRoute(
+                paleta = paleta,
                 viewModel = viewModel,
                 onOpciones = { navController.navigate(Rutas.OPCIONES) },
                 onIrAConectados = { navController.cambiarDeTab(Rutas.CONECTADOS) },
@@ -118,6 +132,7 @@ fun BluetakyNavHost() {
             val viewModel: OpcionesViewModel = viewModel(factory = factory)
 
             OpcionesRoute(
+                paleta = paleta,
                 viewModel = viewModel,
                 onVolver = { navController.popBackStack() }
             )
@@ -132,6 +147,7 @@ fun BluetakyNavHost() {
             val viewModel: ChatDetalleViewModel = viewModel(factory = factory)
 
             ChatDetalleRoute(
+                paleta = paleta,
                 viewModel = viewModel,
                 onVolver = { navController.popBackStack() }
             )

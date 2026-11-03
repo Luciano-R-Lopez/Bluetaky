@@ -14,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,6 +23,7 @@ import com.example.bluetaky.domain.Chat
 import com.example.bluetaky.ui.BarraDeBusqueda
 import com.example.bluetaky.ui.BarraTabs
 import com.example.bluetaky.ui.Colores
+import com.example.bluetaky.ui.Paleta
 import com.example.bluetaky.ui.EncabezadoPrincipal
 import com.example.bluetaky.ui.Tab
 
@@ -34,6 +34,7 @@ import com.example.bluetaky.ui.Tab
 @Composable
 fun ChatsRoute(
     viewModel: ChatsViewModel,
+    paleta: Paleta,
     onOpciones: () -> Unit,
     onIrAConectados: () -> Unit,
     onIrAComunidad: () -> Unit,
@@ -43,6 +44,7 @@ fun ChatsRoute(
 
     ChatsScreen(
         estado = estado,
+        paleta = paleta,
         onBusqueda = viewModel::cambiarBusqueda,
         onOpciones = onOpciones,
         onIrAConectados = onIrAConectados,
@@ -58,6 +60,7 @@ fun ChatsRoute(
  */
 @Composable
 fun ChatsScreen(
+    paleta: Paleta,
     estado: ChatsUiState,
     onBusqueda: (String) -> Unit,
     onOpciones: () -> Unit,
@@ -66,10 +69,12 @@ fun ChatsScreen(
     onAbrirChat: (Int) -> Unit
 ) {
     Scaffold(
+        containerColor = paleta.fondo,
         topBar = {
             Column {
-                EncabezadoPrincipal(estado.nombreUsuario, onOpciones)
+                EncabezadoPrincipal(paleta, estado.nombreUsuario, onOpciones)
                 BarraTabs(
+                    paleta = paleta,
                     tabActual = Tab.CHATS,
                     onConectados = onIrAConectados,
                     onChats = {},
@@ -79,6 +84,7 @@ fun ChatsScreen(
         },
         bottomBar = {
             BarraDeBusqueda(
+                paleta = paleta,
                 valor = estado.busqueda,
                 onValorChange = onBusqueda,
                 etiqueta = "Buscar chat"
@@ -89,7 +95,7 @@ fun ChatsScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(Colores.FondoClaro)
+                .background(paleta.fondo)
                 .verticalScroll(rememberScrollState())
                 .padding(12.dp)
         ) {
@@ -98,13 +104,13 @@ fun ChatsScreen(
                     onClick = { onAbrirChat(chat.id) },
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
+                        containerColor = paleta.superficie,
+                        contentColor = paleta.texto
                     )
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(chat.nombre, fontWeight = FontWeight.Bold, color = Colores.AzulPrincipal)
-                        Text(chat.ultimoMensaje, fontSize = 13.sp, color = Color.DarkGray)
+                        Text(chat.nombre, fontWeight = FontWeight.Bold, color = paleta.principal)
+                        Text(chat.ultimoMensaje, fontSize = 13.sp, color = paleta.textoSecundario)
                     }
                 }
             }
@@ -112,7 +118,7 @@ fun ChatsScreen(
             if (estado.chats.isEmpty()) {
                 Text(
                     "No hay chats que coincidan con la búsqueda.",
-                    color = Color.DarkGray,
+                    color = paleta.textoSecundario,
                     modifier = Modifier.padding(top = 16.dp)
                 )
             }
@@ -124,6 +130,7 @@ fun ChatsScreen(
 @Composable
 private fun ChatsPreview() {
     ChatsScreen(
+        paleta = Colores.Clara,
         estado = ChatsUiState(
             nombreUsuario = "German Lantaño",
             chats = listOf(Chat(1, "Luciano", "Dame todo lo que me debes"))

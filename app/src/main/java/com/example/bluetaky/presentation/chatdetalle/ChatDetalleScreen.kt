@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,6 +24,7 @@ import com.example.bluetaky.domain.Mensaje
 import com.example.bluetaky.ui.BarraDeMensaje
 import com.example.bluetaky.ui.BurbujaMensaje
 import com.example.bluetaky.ui.Colores
+import com.example.bluetaky.ui.Paleta
 
 /**
  * Observa el ViewModel y le reenvía lo que el usuario escribe y envía.
@@ -33,12 +33,14 @@ import com.example.bluetaky.ui.Colores
 @Composable
 fun ChatDetalleRoute(
     viewModel: ChatDetalleViewModel,
+    paleta: Paleta,
     onVolver: () -> Unit
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
 
     ChatDetalleScreen(
         estado = estado,
+        paleta = paleta,
         onTexto = viewModel::cambiarTexto,
         onEnviar = viewModel::enviar,
         onVolver = onVolver
@@ -50,25 +52,27 @@ fun ChatDetalleRoute(
  */
 @Composable
 fun ChatDetalleScreen(
+    paleta: Paleta,
     estado: ChatDetalleUiState,
     onTexto: (String) -> Unit,
     onEnviar: () -> Unit,
     onVolver: () -> Unit
 ) {
     Scaffold(
+        containerColor = paleta.fondo,
         topBar = {
-            Box(modifier = Modifier.fillMaxWidth().background(Colores.AzulPrincipal).padding(12.dp)) {
+            Box(modifier = Modifier.fillMaxWidth().background(paleta.principal).padding(12.dp)) {
                 Button(
                     onClick = onVolver,
                     modifier = Modifier.align(Alignment.CenterStart),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Colores.AzulOscuro,
-                        contentColor = Color.White
+                        containerColor = paleta.principalOscuro,
+                        contentColor = paleta.sobrePrincipal
                     )
                 ) { Text("Volver") }
                 Text(
                     estado.nombreInterlocutor,
-                    color = Color.White,
+                    color = paleta.sobrePrincipal,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -76,6 +80,7 @@ fun ChatDetalleScreen(
         },
         bottomBar = {
             BarraDeMensaje(
+                paleta = paleta,
                 texto = estado.texto,
                 onTextoChange = onTexto,
                 onEnviar = onEnviar
@@ -86,12 +91,12 @@ fun ChatDetalleScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(Colores.FondoClaro)
+                .background(paleta.fondo)
                 .verticalScroll(rememberScrollState())
                 .padding(12.dp)
         ) {
             estado.mensajes.forEach { mensaje ->
-                BurbujaMensaje(mensaje, mostrarAutor = false)
+                BurbujaMensaje(paleta, mensaje, mostrarAutor = false)
             }
         }
     }
@@ -101,6 +106,7 @@ fun ChatDetalleScreen(
 @Composable
 private fun ChatDetallePreview() {
     ChatDetalleScreen(
+        paleta = Colores.Clara,
         estado = ChatDetalleUiState(
             nombreInterlocutor = "Fabian Fernando",
             mensajes = listOf(

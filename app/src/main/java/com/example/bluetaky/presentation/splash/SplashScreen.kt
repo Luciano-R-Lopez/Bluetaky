@@ -11,12 +11,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bluetaky.ui.Colores
+import com.example.bluetaky.ui.Paleta
 
 /**
  * Pantalla de bienvenida. No tiene ViewModel porque no muestra datos que cambien
@@ -24,20 +24,20 @@ import com.example.bluetaky.ui.Colores
  * elige la ruta.
  */
 @Composable
-fun SplashScreen(onComenzar: () -> Unit) {
+fun SplashScreen(paleta: Paleta, onComenzar: () -> Unit) {
     Box(
-        modifier = Modifier.fillMaxSize().background(Colores.AzulPrincipal),
+        modifier = Modifier.fillMaxSize().background(paleta.principal),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("bt", color = Color.White, fontSize = 48.sp, fontWeight = FontWeight.Bold)
-            Text("bluetaky", color = Color.White, fontSize = 22.sp)
+            Text("bt", color = paleta.sobrePrincipal, fontSize = 48.sp, fontWeight = FontWeight.Bold)
+            Text("bluetaky", color = paleta.sobrePrincipal, fontSize = 22.sp)
             Button(
                 onClick = onComenzar,
                 modifier = Modifier.padding(top = 32.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Colores.AzulPrincipal
+                    containerColor = paleta.sobrePrincipal,
+                    contentColor = paleta.principal
                 )
             ) { Text("Comenzar") }
         }
@@ -47,5 +47,5 @@ fun SplashScreen(onComenzar: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 private fun SplashPreview() {
-    SplashScreen(onComenzar = {})
+    SplashScreen(paleta = Colores.Clara, onComenzar = {})
 }

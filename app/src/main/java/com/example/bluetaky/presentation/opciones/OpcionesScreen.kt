@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.bluetaky.domain.Ajustes
 import com.example.bluetaky.ui.Colores
+import com.example.bluetaky.ui.Paleta
 
 /**
  * Observa el ViewModel y le reenvía cada cambio de ajuste. "Volver" se avisa hacia afuera:
@@ -30,12 +30,14 @@ import com.example.bluetaky.ui.Colores
 @Composable
 fun OpcionesRoute(
     viewModel: OpcionesViewModel,
+    paleta: Paleta,
     onVolver: () -> Unit
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
 
     OpcionesScreen(
         estado = estado,
+        paleta = paleta,
         onAlternarDarkMode = viewModel::alternarDarkMode,
         onBajarVolumen = viewModel::bajarVolumen,
         onSubirVolumen = viewModel::subirVolumen,
@@ -51,6 +53,7 @@ fun OpcionesRoute(
  */
 @Composable
 fun OpcionesScreen(
+    paleta: Paleta,
     estado: OpcionesUiState,
     onAlternarDarkMode: () -> Unit,
     onBajarVolumen: () -> Unit,
@@ -59,66 +62,66 @@ fun OpcionesScreen(
     onAlternarNotificaciones: () -> Unit,
     onVolver: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize().background(Color.White).padding(16.dp)) {
-        Text("Opciones", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Colores.AzulPrincipal)
+    Column(modifier = Modifier.fillMaxSize().background(paleta.superficie).padding(16.dp)) {
+        Text("Opciones", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = paleta.principal)
 
-        FilaOpcion("Cambiar a dark mode") {
-            BotonOpcion(if (estado.ajustes.darkMode) "ON" else "OFF", onAlternarDarkMode)
+        FilaOpcion(paleta, "Cambiar a dark mode") {
+            BotonOpcion(paleta, if (estado.ajustes.darkMode) "ON" else "OFF", onAlternarDarkMode)
         }
 
-        FilaOpcion("Volumen") {
+        FilaOpcion(paleta, "Volumen") {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                BotonOpcion("-", onBajarVolumen)
+                BotonOpcion(paleta, "-", onBajarVolumen)
                 Text(
                     "${estado.ajustes.volumen}%",
                     fontWeight = FontWeight.Bold,
-                    color = Colores.AzulPrincipal,
+                    color = paleta.principal,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
-                BotonOpcion("+", onSubirVolumen)
+                BotonOpcion(paleta, "+", onSubirVolumen)
             }
         }
 
-        FilaOpcion("Vibración") {
-            BotonOpcion(if (estado.ajustes.vibracion) "SI" else "NO", onAlternarVibracion)
+        FilaOpcion(paleta, "Vibración") {
+            BotonOpcion(paleta, if (estado.ajustes.vibracion) "SI" else "NO", onAlternarVibracion)
         }
 
-        FilaOpcion("Notificaciones") {
-            BotonOpcion(if (estado.ajustes.notificaciones) "SI" else "NO", onAlternarNotificaciones)
+        FilaOpcion(paleta, "Notificaciones") {
+            BotonOpcion(paleta, if (estado.ajustes.notificaciones) "SI" else "NO", onAlternarNotificaciones)
         }
 
         Button(
             onClick = onVolver,
             modifier = Modifier.padding(top = 16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Colores.AzulPrincipal,
-                contentColor = Color.White
+                containerColor = paleta.principal,
+                contentColor = paleta.sobrePrincipal
             )
         ) { Text("Volver") }
     }
 }
 
 @Composable
-private fun FilaOpcion(etiqueta: String, control: @Composable () -> Unit) {
+private fun FilaOpcion(paleta: Paleta, etiqueta: String, control: @Composable () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
-            .background(Colores.FondoClaro)
+            .background(paleta.fondo)
             .padding(12.dp)
     ) {
-        Text(etiqueta, modifier = Modifier.align(Alignment.CenterStart))
+        Text(etiqueta, color = paleta.texto, modifier = Modifier.align(Alignment.CenterStart))
         Box(modifier = Modifier.align(Alignment.CenterEnd)) { control() }
     }
 }
 
 @Composable
-private fun BotonOpcion(texto: String, onClick: () -> Unit) {
+private fun BotonOpcion(paleta: Paleta, texto: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = Colores.AzulPrincipal,
-            contentColor = Color.White
+            containerColor = paleta.principal,
+            contentColor = paleta.sobrePrincipal
         )
     ) { Text(texto) }
 }
@@ -127,6 +130,7 @@ private fun BotonOpcion(texto: String, onClick: () -> Unit) {
 @Composable
 private fun OpcionesPreview() {
     OpcionesScreen(
+        paleta = Colores.Clara,
         estado = OpcionesUiState(ajustes = Ajustes(volumen = 50, vibracion = true)),
         onAlternarDarkMode = {},
         onBajarVolumen = {},

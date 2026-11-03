@@ -18,6 +18,7 @@ import com.example.bluetaky.ui.BarraDeMensaje
 import com.example.bluetaky.ui.BarraTabs
 import com.example.bluetaky.ui.BurbujaMensaje
 import com.example.bluetaky.ui.Colores
+import com.example.bluetaky.ui.Paleta
 import com.example.bluetaky.ui.EncabezadoPrincipal
 import com.example.bluetaky.ui.Tab
 
@@ -28,6 +29,7 @@ import com.example.bluetaky.ui.Tab
 @Composable
 fun ComunidadRoute(
     viewModel: ComunidadViewModel,
+    paleta: Paleta,
     onOpciones: () -> Unit,
     onIrAConectados: () -> Unit,
     onIrAChats: () -> Unit
@@ -36,6 +38,7 @@ fun ComunidadRoute(
 
     ComunidadScreen(
         estado = estado,
+        paleta = paleta,
         onTexto = viewModel::cambiarTexto,
         onEnviar = viewModel::enviar,
         onOpciones = onOpciones,
@@ -49,6 +52,7 @@ fun ComunidadRoute(
  */
 @Composable
 fun ComunidadScreen(
+    paleta: Paleta,
     estado: ComunidadUiState,
     onTexto: (String) -> Unit,
     onEnviar: () -> Unit,
@@ -57,10 +61,12 @@ fun ComunidadScreen(
     onIrAChats: () -> Unit
 ) {
     Scaffold(
+        containerColor = paleta.fondo,
         topBar = {
             Column {
-                EncabezadoPrincipal(estado.nombreUsuario, onOpciones)
+                EncabezadoPrincipal(paleta, estado.nombreUsuario, onOpciones)
                 BarraTabs(
+                    paleta = paleta,
                     tabActual = Tab.COMUNIDAD,
                     onConectados = onIrAConectados,
                     onChats = onIrAChats,
@@ -70,6 +76,7 @@ fun ComunidadScreen(
         },
         bottomBar = {
             BarraDeMensaje(
+                paleta = paleta,
                 texto = estado.texto,
                 onTextoChange = onTexto,
                 onEnviar = onEnviar
@@ -80,12 +87,12 @@ fun ComunidadScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(Colores.FondoClaro)
+                .background(paleta.fondo)
                 .verticalScroll(rememberScrollState())
                 .padding(12.dp)
         ) {
             estado.mensajes.forEach { mensaje ->
-                BurbujaMensaje(mensaje)
+                BurbujaMensaje(paleta, mensaje)
             }
         }
     }
@@ -95,6 +102,7 @@ fun ComunidadScreen(
 @Composable
 private fun ComunidadPreview() {
     ComunidadScreen(
+        paleta = Colores.Clara,
         estado = ComunidadUiState(
             nombreUsuario = "German Lantaño",
             mensajes = listOf(

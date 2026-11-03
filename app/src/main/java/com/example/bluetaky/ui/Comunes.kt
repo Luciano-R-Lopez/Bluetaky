@@ -9,10 +9,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -20,46 +20,67 @@ import com.example.bluetaky.domain.Mensaje
 
 /**
  * Componentes visuales que se repiten en varias pantallas.
- * No tienen estado propio ni conocen ViewModels: reciben todo por parámetro.
+ * No tienen estado propio ni conocen ViewModels: reciben todo por parámetro,
+ * incluida la [Paleta] con la que se pintan.
  */
 
 /** Pestaña resaltada en [BarraTabs]. Es solo un dato visual, no una ruta. */
 enum class Tab { CONECTADOS, CHATS, COMUNIDAD }
 
+/**
+ * Los TextField de Material pintan con el tema por defecto (siempre claro).
+ * Acá se les indica la paleta para que también se vean bien en modo oscuro.
+ */
 @Composable
-fun EncabezadoPrincipal(nombre: String, onOpciones: () -> Unit) {
-    Box(modifier = Modifier.fillMaxWidth().background(Colores.AzulPrincipal).padding(12.dp)) {
+fun coloresDeCampo(paleta: Paleta) = TextFieldDefaults.colors(
+    focusedContainerColor = paleta.campo,
+    unfocusedContainerColor = paleta.campo,
+    focusedTextColor = paleta.texto,
+    unfocusedTextColor = paleta.texto,
+    focusedLabelColor = paleta.textoSecundario,
+    unfocusedLabelColor = paleta.textoSecundario,
+    cursorColor = paleta.principal
+)
+
+@Composable
+fun EncabezadoPrincipal(paleta: Paleta, nombre: String, onOpciones: () -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth().background(paleta.principal).padding(12.dp)) {
         Text(
             nombre,
-            color = Color.White,
+            color = paleta.sobrePrincipal,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.CenterStart)
         )
         Button(
             onClick = onOpciones,
             modifier = Modifier.align(Alignment.CenterEnd),
-            colors = ButtonDefaults.buttonColors(containerColor = Colores.AzulOscuro, contentColor = Color.White)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = paleta.principalOscuro,
+                contentColor = paleta.sobrePrincipal
+            )
         ) { Text("Opciones") }
     }
 }
 
 @Composable
 fun BarraTabs(
+    paleta: Paleta,
     tabActual: Tab,
     onConectados: () -> Unit,
     onChats: () -> Unit,
     onComunidad: () -> Unit
 ) {
-    Row(modifier = Modifier.fillMaxWidth().background(Colores.AzulOscuro)) {
-        TabBoton("Conectados", tabActual == Tab.CONECTADOS, onConectados, Modifier.weight(1f))
-        TabBoton("Chats", tabActual == Tab.CHATS, onChats, Modifier.weight(1f))
-        TabBoton("Comunidad", tabActual == Tab.COMUNIDAD, onComunidad, Modifier.weight(1f))
+    Row(modifier = Modifier.fillMaxWidth().background(paleta.principalOscuro)) {
+        TabBoton(paleta, "Conectados", tabActual == Tab.CONECTADOS, onConectados, Modifier.weight(1f))
+        TabBoton(paleta, "Chats", tabActual == Tab.CHATS, onChats, Modifier.weight(1f))
+        TabBoton(paleta, "Comunidad", tabActual == Tab.COMUNIDAD, onComunidad, Modifier.weight(1f))
     }
 }
 
 /** Recibe [modifier] para que [BarraTabs] pueda aplicarle weight(1f) desde el Row. */
 @Composable
 private fun TabBoton(
+    paleta: Paleta,
     texto: String,
     activo: Boolean,
     onClick: () -> Unit,
@@ -69,8 +90,8 @@ private fun TabBoton(
         onClick = onClick,
         modifier = modifier.padding(2.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (activo) Color.White else Colores.AzulOscuro,
-            contentColor = if (activo) Colores.AzulPrincipal else Color.White
+            containerColor = if (activo) paleta.superficie else paleta.principalOscuro,
+            contentColor = if (activo) paleta.principal else paleta.sobrePrincipal
         )
     ) { Text(texto, fontSize = 12.sp) }
 }
@@ -78,16 +99,18 @@ private fun TabBoton(
 /** Buscador. El texto que escribe el usuario sube a la pantalla con [onValorChange]. */
 @Composable
 fun BarraDeBusqueda(
+    paleta: Paleta,
     valor: String,
     onValorChange: (String) -> Unit,
     etiqueta: String
 ) {
-    Box(modifier = Modifier.fillMaxWidth().background(Color.White).padding(8.dp)) {
+    Box(modifier = Modifier.fillMaxWidth().background(paleta.superficie).padding(8.dp)) {
         TextField(
             value = valor,
             onValueChange = onValorChange,
             label = { Text(etiqueta) },
             singleLine = true,
+            colors = coloresDeCampo(paleta),
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -96,12 +119,13 @@ fun BarraDeBusqueda(
 /** Campo de mensaje + botón de envío, usado en Comunidad y en el detalle de chat. */
 @Composable
 fun BarraDeMensaje(
+    paleta: Paleta,
     texto: String,
     onTextoChange: (String) -> Unit,
     onEnviar: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().background(Color.White).padding(8.dp),
+        modifier = Modifier.fillMaxWidth().background(paleta.superficie).padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         TextField(
@@ -109,12 +133,16 @@ fun BarraDeMensaje(
             onValueChange = onTextoChange,
             label = { Text("mensaje") },
             singleLine = true,
+            colors = coloresDeCampo(paleta),
             modifier = Modifier.weight(1f)
         )
         Button(
             onClick = onEnviar,
             modifier = Modifier.padding(start = 8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Colores.AzulPrincipal, contentColor = Color.White)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = paleta.principal,
+                contentColor = paleta.sobrePrincipal
+            )
         ) { Text("Enviar") }
     }
 }
@@ -125,23 +153,23 @@ fun BarraDeMensaje(
  * con la posición de la burbuja.
  */
 @Composable
-fun BurbujaMensaje(mensaje: Mensaje, mostrarAutor: Boolean = true) {
+fun BurbujaMensaje(paleta: Paleta, mensaje: Mensaje, mostrarAutor: Boolean = true) {
     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Box(
             modifier = Modifier
-                .background(if (mensaje.propio) Colores.AzulPrincipal else Color.White)
+                .background(if (mensaje.propio) paleta.principal else paleta.superficie)
                 .padding(12.dp)
                 .align(if (mensaje.propio) Alignment.CenterEnd else Alignment.CenterStart)
         ) {
             if (mostrarAutor) {
                 Text(
                     "${mensaje.autor}: ${mensaje.texto}",
-                    color = if (mensaje.propio) Color.White else Colores.AzulOscuro
+                    color = if (mensaje.propio) paleta.sobrePrincipal else paleta.principal
                 )
             } else {
                 Text(
                     mensaje.texto,
-                    color = if (mensaje.propio) Color.White else Color.Black
+                    color = if (mensaje.propio) paleta.sobrePrincipal else paleta.texto
                 )
             }
         }

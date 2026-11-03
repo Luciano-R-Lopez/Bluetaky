@@ -15,12 +15,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.bluetaky.ui.Colores
+import com.example.bluetaky.ui.Paleta
+import com.example.bluetaky.ui.coloresDeCampo
 
 /**
  * Observa el ViewModel y le reenvía lo que el usuario escribe.
@@ -29,12 +30,14 @@ import com.example.bluetaky.ui.Colores
 @Composable
 fun PerfilRoute(
     viewModel: PerfilViewModel,
+    paleta: Paleta,
     onAceptar: () -> Unit
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
 
     PerfilScreen(
         estado = estado,
+        paleta = paleta,
         onNombre = viewModel::cambiarNombre,
         onEstado = viewModel::cambiarEstado,
         onAceptar = onAceptar
@@ -46,25 +49,27 @@ fun PerfilRoute(
  */
 @Composable
 fun PerfilScreen(
+    paleta: Paleta,
     estado: PerfilUiState,
     onNombre: (String) -> Unit,
     onEstado: (String) -> Unit,
     onAceptar: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().background(Color.White).padding(24.dp),
+        modifier = Modifier.fillMaxSize().background(paleta.superficie).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.padding(top = 24.dp).size(100.dp).background(Colores.CampoGris),
+            modifier = Modifier.padding(top = 24.dp).size(100.dp).background(paleta.campo),
             contentAlignment = Alignment.Center
-        ) { Text("bt", color = Colores.AzulPrincipal, fontSize = 36.sp) }
+        ) { Text("bt", color = paleta.principal, fontSize = 36.sp) }
 
         TextField(
             value = estado.nombre,
             onValueChange = onNombre,
             label = { Text("Nombre") },
             singleLine = true,
+            colors = coloresDeCampo(paleta),
             modifier = Modifier.fillMaxWidth().padding(top = 24.dp)
         )
 
@@ -73,12 +78,13 @@ fun PerfilScreen(
             onValueChange = onEstado,
             label = { Text("Estado (opcional)") },
             singleLine = true,
+            colors = coloresDeCampo(paleta),
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp)
         )
 
         Text(
             "Al usar esta aplicación aceptás nuestras políticas y condiciones de uso.",
-            color = Colores.AzulPrincipal,
+            color = paleta.principal,
             fontSize = 13.sp,
             modifier = Modifier.padding(vertical = 20.dp)
         )
@@ -86,8 +92,8 @@ fun PerfilScreen(
         Button(
             onClick = onAceptar,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Colores.AzulPrincipal,
-                contentColor = Color.White
+                containerColor = paleta.principal,
+                contentColor = paleta.sobrePrincipal
             )
         ) { Text("Aceptar") }
     }
@@ -97,6 +103,7 @@ fun PerfilScreen(
 @Composable
 private fun PerfilPreview() {
     PerfilScreen(
+        paleta = Colores.Clara,
         estado = PerfilUiState(nombre = "German Lantaño", estado = "Ya fue wacho"),
         onNombre = {},
         onEstado = {},

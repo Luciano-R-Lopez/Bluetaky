@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,6 +22,7 @@ import com.example.bluetaky.domain.Contacto
 import com.example.bluetaky.ui.BarraDeBusqueda
 import com.example.bluetaky.ui.BarraTabs
 import com.example.bluetaky.ui.Colores
+import com.example.bluetaky.ui.Paleta
 import com.example.bluetaky.ui.EncabezadoPrincipal
 import com.example.bluetaky.ui.Tab
 
@@ -33,6 +33,7 @@ import com.example.bluetaky.ui.Tab
 @Composable
 fun ConectadosRoute(
     viewModel: ConectadosViewModel,
+    paleta: Paleta,
     onOpciones: () -> Unit,
     onIrAChats: () -> Unit,
     onIrAComunidad: () -> Unit
@@ -41,6 +42,7 @@ fun ConectadosRoute(
 
     ConectadosScreen(
         estado = estado,
+        paleta = paleta,
         onBusqueda = viewModel::cambiarBusqueda,
         onOpciones = onOpciones,
         onIrAChats = onIrAChats,
@@ -53,6 +55,7 @@ fun ConectadosRoute(
  */
 @Composable
 fun ConectadosScreen(
+    paleta: Paleta,
     estado: ConectadosUiState,
     onBusqueda: (String) -> Unit,
     onOpciones: () -> Unit,
@@ -60,10 +63,12 @@ fun ConectadosScreen(
     onIrAComunidad: () -> Unit
 ) {
     Scaffold(
+        containerColor = paleta.fondo,
         topBar = {
             Column {
-                EncabezadoPrincipal(estado.nombreUsuario, onOpciones)
+                EncabezadoPrincipal(paleta, estado.nombreUsuario, onOpciones)
                 BarraTabs(
+                    paleta = paleta,
                     tabActual = Tab.CONECTADOS,
                     onConectados = {},
                     onChats = onIrAChats,
@@ -73,6 +78,7 @@ fun ConectadosScreen(
         },
         bottomBar = {
             BarraDeBusqueda(
+                paleta = paleta,
                 valor = estado.busqueda,
                 onValorChange = onBusqueda,
                 etiqueta = "Buscar dispositivo"
@@ -83,29 +89,29 @@ fun ConectadosScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(Colores.FondoClaro)
+                .background(paleta.fondo)
                 .verticalScroll(rememberScrollState())
                 .padding(12.dp)
         ) {
-            Text("Conectados", fontWeight = FontWeight.Bold, color = Colores.AzulPrincipal)
+            Text("Conectados", fontWeight = FontWeight.Bold, color = paleta.principal)
             estado.conectados.forEach { contacto ->
-                FilaUsuario(contacto.nombre, conectado = true)
+                FilaUsuario(paleta, contacto.nombre, conectado = true)
             }
 
             Text(
                 "Desconectados",
                 fontWeight = FontWeight.Bold,
-                color = Colores.AzulPrincipal,
+                color = paleta.principal,
                 modifier = Modifier.padding(top = 16.dp)
             )
             estado.desconectados.forEach { contacto ->
-                FilaUsuario(contacto.nombre, conectado = false)
+                FilaUsuario(paleta, contacto.nombre, conectado = false)
             }
 
             if (estado.sinResultados) {
                 Text(
                     "No se encontró ningún dispositivo con ese nombre.",
-                    color = Color.DarkGray,
+                    color = paleta.textoSecundario,
                     modifier = Modifier.padding(top = 16.dp)
                 )
             }
@@ -114,18 +120,18 @@ fun ConectadosScreen(
 }
 
 @Composable
-private fun FilaUsuario(nombre: String, conectado: Boolean) {
+private fun FilaUsuario(paleta: Paleta, nombre: String, conectado: Boolean) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .background(Color.White)
+            .background(paleta.superficie)
             .padding(12.dp)
     ) {
-        Text(nombre, modifier = Modifier.align(Alignment.CenterStart))
+        Text(nombre, color = paleta.texto, modifier = Modifier.align(Alignment.CenterStart))
         Text(
             if (conectado) "En línea" else "Fuera de línea",
-            color = if (conectado) Colores.AzulPrincipal else Color.Red,
+            color = if (conectado) paleta.principal else paleta.error,
             modifier = Modifier.align(Alignment.CenterEnd)
         )
     }
@@ -135,6 +141,7 @@ private fun FilaUsuario(nombre: String, conectado: Boolean) {
 @Composable
 private fun ConectadosPreview() {
     ConectadosScreen(
+        paleta = Colores.Clara,
         estado = ConectadosUiState(
             nombreUsuario = "German Lantaño",
             conectados = listOf(Contacto("Luciano", true)),
