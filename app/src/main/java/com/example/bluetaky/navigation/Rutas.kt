@@ -11,5 +11,9 @@ object Rutas {
     const val CHATS = "chats"
     const val COMUNIDAD = "comunidad"
     const val OPCIONES = "opciones"
-    const val CHAT_DETALLE = "chat_detalle"
+    const val ARG_CHAT_ID = "chatId"
+    const val CHAT_DETALLE = "chat_detalle/{$ARG_CHAT_ID}"
+
+    /** Ruta concreta de un chat: reemplaza {chatId} por el id real. */
+    fun chatDetalle(chatId: Int): String = "chat_detalle/$chatId"
 }

@@ -92,7 +92,7 @@ fun BluetakyNavHost() {
                 onOpciones = { navController.navigate(Rutas.OPCIONES) },
                 onIrAConectados = { navController.cambiarDeTab(Rutas.CONECTADOS) },
                 onIrAComunidad = { navController.cambiarDeTab(Rutas.COMUNIDAD) },
-                onAbrirChat = { navController.navigate(Rutas.CHAT_DETALLE) }
+                onAbrirChat = { chatId -> navController.navigate(Rutas.chatDetalle(chatId)) }
             )
         }
 
@@ -123,8 +123,12 @@ fun BluetakyNavHost() {
             )
         }
 
-        composable(Rutas.CHAT_DETALLE) {
-            val factory = remember { ChatDetalleViewModelFactory(1, ContenedorApp.repositorioChats) }
+        composable(Rutas.CHAT_DETALLE) { backStackEntry ->
+            // El id viaja en la ruta como texto: se lee del argumento y se pasa a la Factory.
+            val chatId = backStackEntry.arguments?.getString(Rutas.ARG_CHAT_ID)?.toIntOrNull() ?: 0
+            val factory = remember(chatId) {
+                ChatDetalleViewModelFactory(chatId, ContenedorApp.repositorioChats)
+            }
             val viewModel: ChatDetalleViewModel = viewModel(factory = factory)
 
             ChatDetalleRoute(

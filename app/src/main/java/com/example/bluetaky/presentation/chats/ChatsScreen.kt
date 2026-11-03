@@ -37,7 +37,7 @@ fun ChatsRoute(
     onOpciones: () -> Unit,
     onIrAConectados: () -> Unit,
     onIrAComunidad: () -> Unit,
-    onAbrirChat: () -> Unit
+    onAbrirChat: (Int) -> Unit
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -53,6 +53,7 @@ fun ChatsRoute(
 
 /**
  * Dibuja [estado] y nada más. No filtra: la lista ya llega filtrada.
+ * Al tocar un chat avisa su id hacia afuera, para que el grafo abra esa conversación.
  * Cada fila es un Button porque ya trae onClick.
  */
 @Composable
@@ -62,7 +63,7 @@ fun ChatsScreen(
     onOpciones: () -> Unit,
     onIrAConectados: () -> Unit,
     onIrAComunidad: () -> Unit,
-    onAbrirChat: () -> Unit
+    onAbrirChat: (Int) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -94,7 +95,7 @@ fun ChatsScreen(
         ) {
             estado.chats.forEach { chat ->
                 Button(
-                    onClick = onAbrirChat,
+                    onClick = { onAbrirChat(chat.id) },
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.White,
