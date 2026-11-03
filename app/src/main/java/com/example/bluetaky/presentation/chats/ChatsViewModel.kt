@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * Estado y eventos de la pestaña Chats.
@@ -17,11 +18,16 @@ import kotlinx.coroutines.flow.stateIn
  * Abrir un chat no pasa por acá: la Route avisa hacia afuera y lo resuelve el grafo.
  */
 class ChatsViewModel(
-    chatsRepository: ChatsRepository,
+    private val chatsRepository: ChatsRepository,
     perfilRepository: PerfilRepository
 ) : ViewModel() {
 
     private val busqueda = MutableStateFlow("")
+
+    init {
+        // Si la base está vacía (primera vez), carga los chats de ejemplo.
+        viewModelScope.launch { chatsRepository.cargarDatosIniciales() }
+    }
 
     val uiState: StateFlow<ChatsUiState> = combine(
         perfilRepository.observarPerfil(),
@@ -40,7 +46,7 @@ class ChatsViewModel(
         initialValue = ChatsUiState(
             nombreUsuario = "",
             busqueda = "",
-            chats = chatsRepository.observarChats().value
+            chats = emptyList()
         )
     )
 

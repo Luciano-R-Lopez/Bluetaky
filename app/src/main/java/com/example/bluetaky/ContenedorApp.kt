@@ -1,6 +1,7 @@
 package com.example.bluetaky
 
 import android.content.Context
+import com.example.bluetaky.data.local.AppDatabase
 import com.example.bluetaky.data.repository.AjustesRepository
 import com.example.bluetaky.data.repository.AjustesRepositoryImpl
 import com.example.bluetaky.data.repository.ChatsRepository
@@ -12,8 +13,6 @@ import com.example.bluetaky.data.repository.ContactosRepositoryImpl
 import com.example.bluetaky.data.repository.PerfilRepository
 import com.example.bluetaky.data.repository.PerfilRepositoryImpl
 import com.example.bluetaky.data.source.AjustesLocalDataSource
-import com.example.bluetaky.data.source.ChatsLocalDataSource
-import com.example.bluetaky.data.source.ComunidadLocalDataSource
 import com.example.bluetaky.data.source.ContactosLocalDataSource
 import com.example.bluetaky.data.source.PerfilLocalDataSource
 
@@ -28,6 +27,7 @@ import com.example.bluetaky.data.source.PerfilLocalDataSource
  */
 object ContenedorApp {
     private lateinit var contexto: Context
+    private lateinit var baseDeDatos: AppDatabase
 
     /**
      * Se llama una sola vez desde MainActivity.onCreate, antes de setContent
@@ -37,22 +37,24 @@ object ContenedorApp {
      */
     fun inicializar(context: Context) {
         contexto = context.applicationContext
+        baseDeDatos = AppDatabase.obtenerInstancia(context)
     }
 
     val repositorioPerfil: PerfilRepository by lazy {
         PerfilRepositoryImpl(PerfilLocalDataSource(contexto))
     }
 
+    // Contactos sigue en memoria: depende de hardware y no entra en esta instancia.
     val repositorioContactos: ContactosRepository by lazy {
         ContactosRepositoryImpl(ContactosLocalDataSource())
     }
 
     val repositorioChats: ChatsRepository by lazy {
-        ChatsRepositoryImpl(ChatsLocalDataSource())
+        ChatsRepositoryImpl(baseDeDatos.chatDao(), baseDeDatos.mensajeDao())
     }
 
     val repositorioComunidad: ComunidadRepository by lazy {
-        ComunidadRepositoryImpl(ComunidadLocalDataSource())
+        ComunidadRepositoryImpl(baseDeDatos.postComunidadDao())
     }
 
     val repositorioAjustes: AjustesRepository by lazy {

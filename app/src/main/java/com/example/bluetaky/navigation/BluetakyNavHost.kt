@@ -124,7 +124,7 @@ fun BluetakyNavHost() {
         }
 
         composable(Rutas.CHAT_DETALLE) {
-            val factory = remember { ChatDetalleViewModelFactory(ContenedorApp.repositorioChats) }
+            val factory = remember { ChatDetalleViewModelFactory(1, ContenedorApp.repositorioChats) }
             val viewModel: ChatDetalleViewModel = viewModel(factory = factory)
 
             ChatDetalleRoute(

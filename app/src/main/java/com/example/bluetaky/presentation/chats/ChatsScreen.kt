@@ -125,7 +125,7 @@ private fun ChatsPreview() {
     ChatsScreen(
         estado = ChatsUiState(
             nombreUsuario = "German Lantaño",
-            chats = listOf(Chat("Luciano", "Dame todo lo que me debes"))
+            chats = listOf(Chat(1, "Luciano", "Dame todo lo que me debes"))
         ),
         onBusqueda = {},
         onOpciones = {},

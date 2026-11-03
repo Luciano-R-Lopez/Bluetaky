@@ -13,33 +13,34 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * Estado y eventos de la conversación abierta.
+ * Estado y eventos de la conversación [chatId].
  * No dibuja la pantalla, no conoce Navigation y no sabe cómo se guardan los mensajes.
  * "Volver" no pasa por acá: la Route lo avisa hacia afuera y el grafo hace popBackStack().
+ *
+ * El chatId lo recibe por constructor (desde la Factory): así cada chat muestra
+ * y guarda solo sus propios mensajes.
  */
 class ChatDetalleViewModel(
+    private val chatId: Int,
     private val repository: ChatsRepository
 ) : ViewModel() {
 
     private val texto = MutableStateFlow("")
 
     val uiState: StateFlow<ChatDetalleUiState> = combine(
-        repository.observarConversacion(),
+        repository.observarNombreInterlocutor(chatId),
+        repository.observarConversacion(chatId),
         texto
-    ) { mensajes, escrito ->
+    ) { nombre, mensajes, escrito ->
         ChatDetalleUiState(
-            nombreInterlocutor = repository.nombreInterlocutor(),
+            nombreInterlocutor = nombre,
             texto = escrito,
             mensajes = mensajes
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ChatDetalleUiState(
-            nombreInterlocutor = repository.nombreInterlocutor(),
-            texto = "",
-            mensajes = repository.observarConversacion().value
-        )
+        initialValue = ChatDetalleUiState()
     )
 
     fun cambiarTexto(valor: String) {
@@ -53,19 +54,20 @@ class ChatDetalleViewModel(
         }
         texto.value = ""
         viewModelScope.launch {
-            repository.enviarMensaje(escrito)
+            repository.enviarMensaje(chatId, escrito)
         }
     }
 }
 
 class ChatDetalleViewModelFactory(
+    private val chatId: Int,
     private val repository: ChatsRepository
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ChatDetalleViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return ChatDetalleViewModel(repository) as T
+            return ChatDetalleViewModel(chatId, repository) as T
         }
         throw IllegalArgumentException("ViewModel no soportado: ${modelClass.name}")
     }

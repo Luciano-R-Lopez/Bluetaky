@@ -19,6 +19,9 @@ import kotlinx.coroutines.launch
  *
  * El texto en escritura vive acá y no en la View para que sobreviva a la rotación.
  * Los mensajes enviados viven en el repositorio, por eso no se pierden al cambiar de pestaña.
+ *
+ * La base no guarda si un mensaje es propio: se decide acá comparando el autor con el
+ * nombre del perfil, así los mensajes de ejemplo y los enviados se alinean bien.
  */
 class ComunidadViewModel(
     private val comunidadRepository: ComunidadRepository,
@@ -26,6 +29,11 @@ class ComunidadViewModel(
 ) : ViewModel() {
 
     private val texto = MutableStateFlow("")
+
+    init {
+        // Si la base está vacía (primera vez), carga los mensajes de ejemplo.
+        viewModelScope.launch { comunidadRepository.cargarDatosIniciales() }
+    }
 
     val uiState: StateFlow<ComunidadUiState> = combine(
         perfilRepository.observarPerfil(),
@@ -35,7 +43,7 @@ class ComunidadViewModel(
         ComunidadUiState(
             nombreUsuario = perfil.nombre,
             texto = escrito,
-            mensajes = mensajes
+            mensajes = mensajes.map { it.copy(propio = it.autor == perfil.nombre) }
         )
     }.stateIn(
         scope = viewModelScope,
@@ -44,7 +52,7 @@ class ComunidadViewModel(
         initialValue = ComunidadUiState(
             nombreUsuario = "",
             texto = "",
-            mensajes = comunidadRepository.observarMensajes().value
+            mensajes = emptyList()
         )
     )
 
