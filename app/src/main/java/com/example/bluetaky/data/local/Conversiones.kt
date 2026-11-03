@@ -12,10 +12,9 @@ fun ChatEntity.toDomain(): Chat = Chat(id = id, nombre = nombre, ultimoMensaje =
 
 fun MensajeEntity.toDomain(): Mensaje = Mensaje(autor = autor, texto = texto, propio = propio)
 
-/** Siempre sale con propio = false; el ViewModel de la comunidad lo corrige según el perfil. */
-fun PostComunidadEntity.toDomain(): Mensaje = Mensaje(autor = autor, texto = texto, propio = false)
+fun PostComunidadEntity.toDomain(): Mensaje = Mensaje(autor = autor, texto = texto, propio = propio)
 
 fun Mensaje.toEntity(chatId: Int): MensajeEntity =
     MensajeEntity(chatId = chatId, autor = autor, texto = texto, propio = propio)
 
-fun Mensaje.toPostEntity(): PostComunidadEntity = PostComunidadEntity(autor = autor, texto = texto)
+fun Mensaje.toPostEntity(): PostComunidadEntity = PostComunidadEntity(autor = autor, texto = texto, propio = propio)
