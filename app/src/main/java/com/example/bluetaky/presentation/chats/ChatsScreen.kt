@@ -109,8 +109,8 @@ fun ChatsScreen(
                     )
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(chat.nombre, fontWeight = FontWeight.Bold, color = paleta.principal)
-                        Text(chat.ultimoMensaje, fontSize = 13.sp, color = paleta.textoSecundario)
+                        Text(chat.nombre, fontWeight = FontWeight.Bold, color = paleta.acento)
+                        Text(chat.ultimoMensaje, fontSize = 13.sp, color = paleta.texto)
                     }
                 }
             }

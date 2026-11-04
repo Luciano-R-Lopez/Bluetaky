@@ -63,7 +63,7 @@ fun OpcionesScreen(
     onVolver: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize().background(paleta.superficie).padding(16.dp)) {
-        Text("Opciones", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = paleta.principal)
+        Text("Opciones", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = paleta.acento)
 
         FilaOpcion(paleta, "Cambiar a dark mode") {
             BotonOpcion(paleta, if (estado.ajustes.darkMode) "ON" else "OFF", onAlternarDarkMode)
@@ -75,7 +75,7 @@ fun OpcionesScreen(
                 Text(
                     "${estado.ajustes.volumen}%",
                     fontWeight = FontWeight.Bold,
-                    color = paleta.principal,
+                    color = paleta.acento,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
                 BotonOpcion(paleta, "+", onSubirVolumen)

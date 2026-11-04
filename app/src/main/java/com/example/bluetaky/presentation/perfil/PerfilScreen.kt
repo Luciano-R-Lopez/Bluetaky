@@ -62,7 +62,7 @@ fun PerfilScreen(
         Box(
             modifier = Modifier.padding(top = 24.dp).size(100.dp).background(paleta.campo),
             contentAlignment = Alignment.Center
-        ) { Text("bt", color = paleta.principal, fontSize = 36.sp) }
+        ) { Text("bt", color = paleta.acento, fontSize = 36.sp) }
 
         TextField(
             value = estado.nombre,
@@ -84,7 +84,7 @@ fun PerfilScreen(
 
         Text(
             "Al usar esta aplicación aceptás nuestras políticas y condiciones de uso.",
-            color = paleta.principal,
+            color = paleta.acento,
             fontSize = 13.sp,
             modifier = Modifier.padding(vertical = 20.dp)
         )

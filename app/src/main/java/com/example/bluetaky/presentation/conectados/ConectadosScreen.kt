@@ -93,7 +93,7 @@ fun ConectadosScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(12.dp)
         ) {
-            Text("Conectados", fontWeight = FontWeight.Bold, color = paleta.principal)
+            Text("Conectados", fontWeight = FontWeight.Bold, color = paleta.acento)
             estado.conectados.forEach { contacto ->
                 FilaUsuario(paleta, contacto.nombre, conectado = true)
             }
@@ -101,7 +101,7 @@ fun ConectadosScreen(
             Text(
                 "Desconectados",
                 fontWeight = FontWeight.Bold,
-                color = paleta.principal,
+                color = paleta.acento,
                 modifier = Modifier.padding(top = 16.dp)
             )
             estado.desconectados.forEach { contacto ->
@@ -131,7 +131,7 @@ private fun FilaUsuario(paleta: Paleta, nombre: String, conectado: Boolean) {
         Text(nombre, color = paleta.texto, modifier = Modifier.align(Alignment.CenterStart))
         Text(
             if (conectado) "En línea" else "Fuera de línea",
-            color = if (conectado) paleta.principal else paleta.error,
+            color = if (conectado) paleta.acento else paleta.error,
             modifier = Modifier.align(Alignment.CenterEnd)
         )
     }

@@ -2,8 +2,11 @@ package com.example.bluetaky.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,7 +42,7 @@ fun coloresDeCampo(paleta: Paleta) = TextFieldDefaults.colors(
     unfocusedTextColor = paleta.texto,
     focusedLabelColor = paleta.textoSecundario,
     unfocusedLabelColor = paleta.textoSecundario,
-    cursorColor = paleta.principal
+    cursorColor = paleta.acento
 )
 
 @Composable
@@ -90,8 +93,8 @@ private fun TabBoton(
         onClick = onClick,
         modifier = modifier.padding(2.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (activo) paleta.superficie else paleta.principalOscuro,
-            contentColor = if (activo) paleta.principal else paleta.sobrePrincipal
+            containerColor = if (activo) paleta.tabActivo else paleta.principalOscuro,
+            contentColor = if (activo) paleta.textoTabActivo else paleta.sobrePrincipal
         )
     ) { Text(texto, fontSize = 12.sp) }
 }
@@ -116,7 +119,11 @@ fun BarraDeBusqueda(
     }
 }
 
-/** Campo de mensaje + botón de envío, usado en Comunidad y en el detalle de chat. */
+/**
+ * Campo de mensaje + botón de envío, usado en Comunidad y en el detalle de chat.
+ * navigationBarsPadding() lo separa de la barra de gestos y imePadding() lo sube cuando
+ * aparece el teclado. Van después del fondo para que el color cubra también ese espacio.
+ */
 @Composable
 fun BarraDeMensaje(
     paleta: Paleta,
@@ -125,7 +132,12 @@ fun BarraDeMensaje(
     onEnviar: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().background(paleta.superficie).padding(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(paleta.superficie)
+            .navigationBarsPadding()
+            .imePadding()
+            .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         TextField(
@@ -149,7 +161,7 @@ fun BarraDeMensaje(
 
 /**
  * Burbuja de mensaje: a la derecha si es propio, a la izquierda si es recibido.
- * Con [mostrarAutor] = false se omite el nombre; en un chat de a dos alcanza
+ * El autor va en negrita sobre el texto. Con [mostrarAutor] = false se omite; en un chat de a dos alcanza
  * con la posición de la burbuja.
  */
 @Composable
@@ -161,16 +173,12 @@ fun BurbujaMensaje(paleta: Paleta, mensaje: Mensaje, mostrarAutor: Boolean = tru
                 .padding(12.dp)
                 .align(if (mensaje.propio) Alignment.CenterEnd else Alignment.CenterStart)
         ) {
-            if (mostrarAutor) {
-                Text(
-                    "${mensaje.autor}: ${mensaje.texto}",
-                    color = if (mensaje.propio) paleta.sobrePrincipal else paleta.principal
-                )
-            } else {
-                Text(
-                    mensaje.texto,
-                    color = if (mensaje.propio) paleta.sobrePrincipal else paleta.texto
-                )
+            val colorTexto = if (mensaje.propio) paleta.sobrePrincipal else paleta.texto
+            Column {
+                if (mostrarAutor) {
+                    Text(mensaje.autor, color = colorTexto, fontWeight = FontWeight.Bold)
+                }
+                Text(mensaje.texto, color = colorTexto)
             }
         }
     }

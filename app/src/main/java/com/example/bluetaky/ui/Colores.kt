@@ -10,6 +10,9 @@ import androidx.compose.ui.graphics.Color
 data class Paleta(
     val principal: Color,
     val principalOscuro: Color,
+    val acento: Color,
+    val tabActivo: Color,
+    val textoTabActivo: Color,
     val fondo: Color,
     val campo: Color,
     val superficie: Color,
@@ -24,12 +27,19 @@ data class Paleta(
  * pantallas pintan con estos colores (fondos, botones, burbujas) y no con un tema.
  * La paleta activa la elige [paleta] según el dark mode guardado en DataStore, y el
  * grafo de navegación se la pasa a cada pantalla como parámetro.
+ *
+ * [principal] sirve de fondo (encabezado, botones, burbujas propias) con [sobrePrincipal]
+ * encima. [acento] es el azul para usar como color de TEXTO sobre fondo o superficie:
+ * en la paleta oscura es más claro para que se lea. [tabActivo] resalta la pestaña elegida.
  * Es capa visual: no sabe nada de datos ni de pantallas.
  */
 object Colores {
     val Clara = Paleta(
         principal = Color(0xFF3A6EA5),
         principalOscuro = Color(0xFF2C5680),
+        acento = Color(0xFF3A6EA5),
+        tabActivo = Color.White,
+        textoTabActivo = Color(0xFF3A6EA5),
         fondo = Color(0xFFF2F2F2),
         campo = Color(0xFFE3E3E3),
         superficie = Color.White,
@@ -40,8 +50,11 @@ object Colores {
     )
 
     val Oscura = Paleta(
-        principal = Color(0xFF4A7DB5),
-        principalOscuro = Color(0xFF2C5680),
+        principal = Color(0xFF3F72AA),
+        principalOscuro = Color(0xFF1B3A5C),
+        acento = Color(0xFF7FB2E8),
+        tabActivo = Color(0xFF3F72AA),
+        textoTabActivo = Color.White,
         fondo = Color(0xFF121212),
         campo = Color(0xFF2A2A2A),
         superficie = Color(0xFF1E1E1E),
