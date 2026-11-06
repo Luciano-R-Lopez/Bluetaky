@@ -63,7 +63,7 @@ class ChatsRepositoryImpl(
             "Luciano" to "Dame todo lo que me debes",
             "Fernando2" to "viste que hay alguien que se llama como yo?",
             "lagarto1234" to "grabamos un video?",
-            "Javier Milei" to "ahi te pague todo",
+            "Tomás Quiroga" to "ahi te pague todo",
             "Alberzo Fernande" to "Decime algo lindo"
         )
 
