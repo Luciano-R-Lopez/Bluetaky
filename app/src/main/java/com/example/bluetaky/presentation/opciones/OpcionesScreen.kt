@@ -1,5 +1,11 @@
 package com.example.bluetaky.presentation.opciones
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,11 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.core.content.ContextCompat
 import com.example.bluetaky.domain.Ajustes
 import com.example.bluetaky.ui.Colores
 import com.example.bluetaky.ui.Paleta
@@ -42,14 +50,16 @@ fun OpcionesRoute(
         onBajarVolumen = viewModel::bajarVolumen,
         onSubirVolumen = viewModel::subirVolumen,
         onAlternarVibracion = viewModel::alternarVibracion,
-        onAlternarNotificaciones = viewModel::alternarNotificaciones,
+        onDesactivarNotificaciones = viewModel::desactivarNotificaciones,
+        onResultadoPermisoNotificaciones = viewModel::resultadoPermisoNotificaciones,
         onVolver = onVolver
     )
 }
 
 /**
  * Dibuja [estado] y nada más. Cada ajuste es un Button que avisa hacia afuera;
- * no calcula el valor nuevo.
+ * no calcula el valor nuevo. Lo único que hace acá es hablar con el sistema para el permiso
+ * de notificaciones (ver [permisoNotificacionesConcedido]).
  */
 @Composable
 fun OpcionesScreen(
@@ -59,9 +69,17 @@ fun OpcionesScreen(
     onBajarVolumen: () -> Unit,
     onSubirVolumen: () -> Unit,
     onAlternarVibracion: () -> Unit,
-    onAlternarNotificaciones: () -> Unit,
+    onDesactivarNotificaciones: () -> Unit,
+    onResultadoPermisoNotificaciones: (Boolean) -> Unit,
     onVolver: () -> Unit
 ) {
+    // El permiso se pide acá y no en el ViewModel porque necesita Context y el launcher
+    // de la Activity. El ViewModel solo recibe el resultado y decide qué guardar.
+    val contexto = LocalContext.current
+    val lanzadorPermiso = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { concedido -> onResultadoPermisoNotificaciones(concedido) }
+
     Column(modifier = Modifier.fillMaxSize().background(paleta.superficie).padding(16.dp)) {
         Text("Opciones", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = paleta.acento)
 
@@ -87,7 +105,24 @@ fun OpcionesScreen(
         }
 
         FilaOpcion(paleta, "Notificaciones") {
-            BotonOpcion(paleta, if (estado.ajustes.notificaciones) "SI" else "NO", onAlternarNotificaciones)
+            BotonOpcion(paleta, if (estado.ajustes.notificaciones) "SI" else "NO") {
+                if (estado.ajustes.notificaciones) {
+                    onDesactivarNotificaciones()
+                } else if (permisoNotificacionesConcedido(contexto)) {
+                    onResultadoPermisoNotificaciones(true)
+                } else {
+                    lanzadorPermiso.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
+
+        if (estado.permisoNotificacionesDenegado) {
+            Text(
+                "Bluetaky necesita este permiso para avisarte de mensajes nuevos. " +
+                    "Podés habilitarlo desde Configuración del sistema > Aplicaciones > Bluetaky > Notificaciones.",
+                color = paleta.error,
+                fontSize = 13.sp
+            )
         }
 
         Button(
@@ -136,7 +171,28 @@ private fun OpcionesPreview() {
         onBajarVolumen = {},
         onSubirVolumen = {},
         onAlternarVibracion = {},
-        onAlternarNotificaciones = {},
+        onDesactivarNotificaciones = {},
+        onResultadoPermisoNotificaciones = {},
         onVolver = {}
     )
+}
+
+/**
+ * Los tres estados del permiso (apunte de permisos): concedido, denegado y no solicitado.
+ * checkSelfPermission solo distingue concedido de no concedido; "denegado" vs "no solicitado"
+ * lo sabemos por el resultado del launcher, que llega al ViewModel.
+ *
+ * POST_NOTIFICATIONS es un permiso peligroso (afecta lo que el usuario ve en su pantalla)
+ * y desde Android 13 (API 33) hay que pedirlo en tiempo de ejecución, además de declararlo
+ * en el Manifest. Antes de la API 33 no existe ese permiso: queda concedido al declararlo.
+ * Aun pidiéndolo, la decisión final es del usuario y puede cambiarla desde Configuración.
+ */
+private fun permisoNotificacionesConcedido(contexto: Context): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        return true
+    }
+    return ContextCompat.checkSelfPermission(
+        contexto,
+        Manifest.permission.POST_NOTIFICATIONS
+    ) == PackageManager.PERMISSION_GRANTED
 }

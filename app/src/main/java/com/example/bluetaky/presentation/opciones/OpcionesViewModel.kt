@@ -4,9 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.bluetaky.data.repository.AjustesRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -22,9 +23,14 @@ class OpcionesViewModel(
     private val repository: AjustesRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<OpcionesUiState> = repository.observarAjustes()
-        .map { OpcionesUiState(ajustes = it) }
-        .stateIn(
+    private val permisoDenegado = MutableStateFlow(false)
+
+    val uiState: StateFlow<OpcionesUiState> = combine(
+        repository.observarAjustes(),
+        permisoDenegado
+    ) { ajustes, denegado ->
+        OpcionesUiState(ajustes = ajustes, permisoNotificacionesDenegado = denegado)
+    }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = OpcionesUiState()
@@ -40,9 +46,24 @@ class OpcionesViewModel(
         viewModelScope.launch { repository.actualizarVibracion(nuevo) }
     }
 
-    fun alternarNotificaciones() {
-        val nuevo = !uiState.value.ajustes.notificaciones
-        viewModelScope.launch { repository.actualizarNotificaciones(nuevo) }
+    /** Apagar las notificaciones no necesita ningún permiso. */
+    fun desactivarNotificaciones() {
+        permisoDenegado.value = false
+        viewModelScope.launch { repository.actualizarNotificaciones(false) }
+    }
+
+    /**
+     * Recibe el resultado del permiso POST_NOTIFICATIONS y decide qué se guarda.
+     * La Screen solo pregunta al sistema y avisa acá lo que contestó el usuario.
+     *
+     * - Concedido: notificaciones = true en DataStore.
+     * - Denegado: queda en false y se marca el estado para que la pantalla explique
+     *   por qué la app lo necesita. La decisión final es del usuario: si denegó, la app
+     *   no puede insistir y solo puede indicarle que lo habilite desde Configuración.
+     */
+    fun resultadoPermisoNotificaciones(concedido: Boolean) {
+        permisoDenegado.value = !concedido
+        viewModelScope.launch { repository.actualizarNotificaciones(concedido) }
     }
 
     fun subirVolumen() {

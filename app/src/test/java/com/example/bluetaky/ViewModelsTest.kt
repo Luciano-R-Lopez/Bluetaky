@@ -1,5 +1,6 @@
 package com.example.bluetaky
 
+import com.example.bluetaky.domain.Ajustes
 import com.example.bluetaky.presentation.chatdetalle.ChatDetalleViewModel
 import com.example.bluetaky.presentation.opciones.OpcionesViewModel
 import com.example.bluetaky.presentation.perfil.PerfilViewModel
@@ -58,6 +59,29 @@ class ViewModelsTest {
         viewModel.alternarVibracion()
 
         assertFalse(viewModel.uiState.value.ajustes.vibracion)
+    }
+
+    @Test
+    fun opcionesViewModel_permisoDenegado_notificacionesQuedaEnFalse() = runTest {
+        val viewModel = OpcionesViewModel(AjustesRepositoryFalso())
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
+        assertTrue(viewModel.uiState.value.ajustes.notificaciones)
+
+        viewModel.resultadoPermisoNotificaciones(false)
+
+        assertFalse(viewModel.uiState.value.ajustes.notificaciones)
+        assertTrue(viewModel.uiState.value.permisoNotificacionesDenegado)
+    }
+
+    @Test
+    fun opcionesViewModel_permisoConcedido_activaNotificaciones() = runTest {
+        val viewModel = OpcionesViewModel(AjustesRepositoryFalso(Ajustes(notificaciones = false)))
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
+
+        viewModel.resultadoPermisoNotificaciones(true)
+
+        assertTrue(viewModel.uiState.value.ajustes.notificaciones)
+        assertFalse(viewModel.uiState.value.permisoNotificacionesDenegado)
     }
 
     @Test
