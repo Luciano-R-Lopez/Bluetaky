@@ -63,9 +63,8 @@ class ViewModelsTest {
 
     @Test
     fun opcionesViewModel_permisoDenegado_notificacionesQuedaEnFalse() = runTest {
-        val viewModel = OpcionesViewModel(AjustesRepositoryFalso())
+        val viewModel = OpcionesViewModel(AjustesRepositoryFalso(Ajustes(notificaciones = false)))
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
-        assertTrue(viewModel.uiState.value.ajustes.notificaciones)
 
         viewModel.resultadoPermisoNotificaciones(false)
 

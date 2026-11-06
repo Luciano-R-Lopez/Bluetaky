@@ -10,5 +10,5 @@ data class Ajustes(
     val darkMode: Boolean = false,
     val volumen: Int = 50,
     val vibracion: Boolean = true,
-    val notificaciones: Boolean = true
+    val notificaciones: Boolean = false
 )

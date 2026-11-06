@@ -21,7 +21,7 @@ class AjustesLocalDataSource(
             darkMode = prefs[PreferencesKeys.DARK_MODE] ?: false,
             volumen = prefs[PreferencesKeys.VOLUMEN] ?: 50,
             vibracion = prefs[PreferencesKeys.VIBRACION] ?: true,
-            notificaciones = prefs[PreferencesKeys.NOTIFICACIONES] ?: true
+            notificaciones = prefs[PreferencesKeys.NOTIFICACIONES] ?: false
         )
     }
 
